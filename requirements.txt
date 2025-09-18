@@ -1,0 +1,16 @@
+# ProyectoFinal2 - Crime Data Analysis
+# Dependencies for crime data analysis with Streamlit dashboard
+
+# Core data science libraries
+pandas>=2.3.0
+numpy>=2.3.0
+matplotlib>=3.10.0
+
+# Machine learning
+scikit-learn>=1.7.0
+
+# Web application framework
+streamlit>=1.49.0
+
+# Python version requirement
+# Requires Python 3.8+

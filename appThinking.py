@@ -105,6 +105,8 @@ X_train_r, X_test_r, y_train_r, y_test_r = train_test_split(
 )
 
 # Normalización segura para regresión
+X_train_r = np.array(X_train_r, dtype=np.float64)
+X_test_r = np.array(X_test_r, dtype=np.float64)
 mean = X_train_r.mean(axis=0)
 std = X_train_r.std(axis=0)
 std[std == 0] = 1

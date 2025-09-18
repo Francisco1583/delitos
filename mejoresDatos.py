@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV, cross_valida
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
-    mean_squared_error, roc_curve, roc_auc_score
+    mean_squared_error, roc_curve, roc_auc_score, confusion_matrix
 )
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -105,6 +105,8 @@ X_train_r, X_test_r, y_train_r, y_test_r = train_test_split(
 )
 
 # Normalización segura para regresión
+X_train_r = np.array(X_train_r, dtype=np.float64)
+X_test_r = np.array(X_test_r, dtype=np.float64)
 mean = X_train_r.mean(axis=0)
 std = X_train_r.std(axis=0)
 std[std == 0] = 1
@@ -194,4 +196,73 @@ plt.ylabel("True Positive Rate")
 plt.title("Curva ROC - Regresión Logística")
 plt.legend(loc="lower right")
 plt.grid(True)
+plt.savefig("plots/1_roc_curve.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+# ==========================
+# VISUALIZACIONES ADICIONALES
+# ==========================
+
+# 1. Confusion Matrix
+print("\n--- Matriz de Confusión ---")
+y_pred_best = best_log_reg.predict(X_test_c)
+cm = confusion_matrix(y_test_c, y_pred_best)
+plt.figure(figsize=(6,5))
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+plt.title('Matriz de Confusión')
+plt.colorbar()
+tick_marks = np.arange(2)
+plt.xticks(tick_marks, ['No Asalto', 'Asalto'])
+plt.yticks(tick_marks, ['No Asalto', 'Asalto'])
+plt.ylabel('Verdadero')
+plt.xlabel('Predicho')
+
+# Add text annotations
+for i in range(2):
+    for j in range(2):
+        plt.text(j, i, cm[i, j], horizontalalignment="center", color="white" if cm[i, j] > cm.max() / 2 else "black")
+
+plt.tight_layout()
+plt.savefig("plots/2_confusion_matrix.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+# 2. Metrics Comparison
+print("\n--- Comparación de Métricas ---")
+metrics_names = ['Accuracy', 'Precision', 'Recall', 'F1']
+metrics_values = [
+    accuracy_score(y_test_c, y_pred_best),
+    precision_score(y_test_c, y_pred_best),
+    recall_score(y_test_c, y_pred_best),
+    f1_score(y_test_c, y_pred_best)
+]
+
+plt.figure(figsize=(8,5))
+bars = plt.bar(metrics_names, metrics_values, color=['skyblue', 'lightgreen', 'salmon', 'gold'])
+plt.title('Comparación de Métricas de Clasificación')
+plt.ylabel('Score')
+plt.ylim(0, 1)
+
+# Add value labels on bars
+for bar, value in zip(bars, metrics_values):
+    plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+             f'{value:.3f}', ha='center', va='bottom')
+
+plt.grid(axis='y', alpha=0.3)
+plt.savefig("plots/3_metrics_comparison.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+# 3. Crime Distribution by Turno
+print("\n--- Distribución de Crímenes por Turno ---")
+turno_counts = df.groupby(['turno', 'asalto']).size().unstack(fill_value=0)
+
+plt.figure(figsize=(8,5))
+turno_counts.plot(kind='bar', stacked=True, color=['lightcoral', 'steelblue'])
+plt.title('Distribución de Asaltos por Turno')
+plt.xlabel('Turno')
+plt.ylabel('Cantidad de Casos')
+plt.legend(['No Asalto', 'Asalto'], loc='upper right')
+plt.xticks(rotation=45)
+plt.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.savefig("plots/4_crime_by_turno.png", dpi=300, bbox_inches='tight')
 plt.show()
